@@ -1,11 +1,13 @@
 import Net from 'net'
-const port = 1337
+const port = 1234
 const host = 'localhost'
 
 const Color = {
   RED: 'ff0000',
   GREEN: '00ff00',
-  WHITE: 'ffffff'
+  WHITE: 'ffffff',
+  BLUE: '0000ff',
+  LIGHTBLUE: 'ADD8E6'
 }
 
 function randomInt(min: number, max: number) {  
@@ -54,13 +56,13 @@ class ScreenDrawer {
   }
 
   drawRectangle(xOffset: number, yOffset: number, width: number, height: number, color = Color.RED) {
-    const rounds = 200
+    const rounds = 1
 
     for(let i = 0; i < rounds; i++) {
       for(let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
           const pixel = new Pixel(x + xOffset, y + yOffset, color)
-          this.client.write(pixel.toCommand())
+          this.client.write(pixel.toCommand() + '\n')
         }
       }
     }
@@ -81,6 +83,44 @@ class ScreenDrawer {
 
 const client = new Net.Socket()
 const screenDrawer = new ScreenDrawer(port, host)
+
+function initDrops(count: number) {
+  const drops = []
+  for (let i = 0; i < count; i++) {
+    drops.push({ x: randomInt(0, 1920), yOffset: randomInt(0, 30)})
+  }
+  return drops
+}
+
 screenDrawer.start(() => {
-  screenDrawer.drawRectangle(randomInt(0, 1920 - 200), randomInt(0, 1080 - 200), 200, 200)
+  const height = 20
+  const width = 4
+  let rainDistance = 0
+  const numOfDrops = 20
+  let drops = initDrops(numOfDrops)
+
+  const backgroundColor = Color.WHITE
+  const foregroundColor = Color.BLUE
+  const secondaryForegroundColor = Color.LIGHTBLUE
+
+  screenDrawer.drawRectangle(0, 0, 1920, 1080, backgroundColor)
+
+  while (true) {
+    drops.forEach(
+      (drop) => {
+        screenDrawer.drawRectangle(drop.x, rainDistance + drop.yOffset, width, height, foregroundColor)
+      } 
+    )
+    drops.forEach(
+      (drop) => {
+        screenDrawer.drawRectangle(drop.x, rainDistance + drop.yOffset, width, height, secondaryForegroundColor)
+      } 
+    )
+    rainDistance += 2
+
+    if (rainDistance >= 1920) {
+      rainDistance = randomInt(0, 20)
+      drops = initDrops(randomInt(numOfDrops, numOfDrops + 5))
+    }
+  }
 })
