@@ -93,17 +93,18 @@ function initDrops(count: number) {
 }
 
 screenDrawer.start(() => {
-  const height = 20
-  const width = 4
+  const height = 200
+  const width = 40
   let rainDistance = 0
-  const numOfDrops = 20
+  const numOfDrops = 5
   let drops = initDrops(numOfDrops)
 
+  const speed = 2
   const backgroundColor = Color.WHITE
   const foregroundColor = Color.BLUE
   const secondaryForegroundColor = Color.LIGHTBLUE
 
-  screenDrawer.drawRectangle(0, 0, 1920, 1080, backgroundColor)
+  screenDrawer.drawRectangle(0, 300, 1920, 1080 - 600, backgroundColor)
 
   while (true) {
     drops.forEach(
@@ -116,7 +117,7 @@ screenDrawer.start(() => {
         screenDrawer.drawRectangle(drop.x, rainDistance + drop.yOffset, width, height, secondaryForegroundColor)
       } 
     )
-    rainDistance += 2
+    rainDistance += speed 
 
     if (rainDistance >= 1920) {
       rainDistance = randomInt(0, 20)
