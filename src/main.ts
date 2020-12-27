@@ -1,36 +1,27 @@
-// Include Nodejs' net module.
-import Net from 'net';
-// The port number and hostname of the server.
-const port = 1337;
-const host = 'localhost';
+import Net from 'net'
+const port = 1337
+const host = 'localhost'
 
-// Create a new TCP client.
-const client = new Net.Socket();
-// Send a connection request to the server.
+const client = new Net.Socket()
 client.connect(
-    { port: port, host: host }, function() {
-    // If there is no error, the server has accepted the request and created a new 
-    // socket dedicated to us.
-    console.log('TCP connection established with the server.');
+  { port: port, host: host }, function() {
 
-    // The client can now send data to the server by writing to its socket.
-    for(let i = 0; i < 2000; i++) {
-        for(let x = 0; x < 200; x++) {
-            for (let y = 0; y < 200; y++) {
-                client.write(`PX ${x} ${y} ffffff\n`);
-            }
-        }
-    }
-});
-
-// The client can also receive data from the server by reading from its socket.
-client.on('data', function(chunk) {
-    console.log(`Data received from the server: ${chunk.toString()}.`);
+    console.log('TCP connection established with the server.')
     
-    // Request an end to the connection after the data has been received.
-    client.end();
-});
+    for(let i = 0; i < 2000; i++) {
+      for(let x = 0; x < 200; x++) {
+        for (let y = 0; y < 200; y++) {
+          client.write(`PX ${x} ${y} ffffff\n`)
+        }
+      }
+    }
+  })
+
+client.on('data', function(chunk) {
+  console.log(`Data received from the server: ${chunk.toString()}.`)
+  client.end()
+})
 
 client.on('end', function() {
-    console.log('Requested an end to the TCP connection');
-});
+  console.log('Requested an end to the TCP connection')
+})
