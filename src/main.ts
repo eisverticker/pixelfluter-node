@@ -7,7 +7,8 @@ const Color = {
   GREEN: '00ff00',
   WHITE: 'ffffff',
   BLUE: '0000ff',
-  LIGHTBLUE: 'ADD8E6'
+  LIGHTBLUE: 'ADD8E6',
+  LIGHTPINK: 'FFB6C1'
 }
 
 function randomInt(min: number, max: number) {  
@@ -51,8 +52,12 @@ class Pixel {
 class ScreenDrawer {
   public client: Net.Socket
 
-  constructor(private port: number, private host: string) {
+  constructor(private port: number, private host: string, public screenWidth: number, public screenHeight: number) {
     this.client = new Net.Socket()
+  }
+
+  drawBackground(color = Color.WHITE) {
+    this.drawRectangle(0, 0, this.screenWidth, this.screenHeight, color)
   }
 
   drawRectangle(xOffset: number, yOffset: number, width: number, height: number, color = Color.RED) {
@@ -82,29 +87,28 @@ class ScreenDrawer {
 }
 
 const client = new Net.Socket()
-const screenDrawer = new ScreenDrawer(port, host)
+const screenDrawer = new ScreenDrawer(port, host, 1920, 1080)
 
-function initDrops(count: number) {
+function initDrops(count: number, screenWidth: number) {
   const drops = []
   for (let i = 0; i < count; i++) {
-    drops.push({ x: randomInt(0, 1920), yOffset: randomInt(0, 30)})
+    drops.push({ x: randomInt(0, screenWidth), yOffset: randomInt(0, 30)})
   }
   return drops
 }
 
 screenDrawer.start(() => {
-  const height = 200
-  const width = 40
-  let rainDistance = 0
-  const numOfDrops = 5
-  let drops = initDrops(numOfDrops)
-
-  const speed = 2
+  const height = 10
+  const width = 3
+  const numOfDrops = 100
+  const speed = 3
   const backgroundColor = Color.WHITE
   const foregroundColor = Color.BLUE
-  const secondaryForegroundColor = Color.LIGHTBLUE
+  const secondaryForegroundColor = Color.WHITE
 
-  screenDrawer.drawRectangle(0, 300, 1920, 1080 - 600, backgroundColor)
+  let rainDistance = 0
+  let drops = initDrops(numOfDrops, screenDrawer.screenWidth)
+  screenDrawer.drawBackground(backgroundColor)
 
   while (true) {
     drops.forEach(
@@ -112,6 +116,7 @@ screenDrawer.start(() => {
         screenDrawer.drawRectangle(drop.x, rainDistance + drop.yOffset, width, height, foregroundColor)
       } 
     )
+    // 
     drops.forEach(
       (drop) => {
         screenDrawer.drawRectangle(drop.x, rainDistance + drop.yOffset, width, height, secondaryForegroundColor)
@@ -119,9 +124,9 @@ screenDrawer.start(() => {
     )
     rainDistance += speed 
 
-    if (rainDistance >= 1920) {
+    if (rainDistance >= screenDrawer.screenWidth) {
       rainDistance = randomInt(0, 20)
-      drops = initDrops(randomInt(numOfDrops, numOfDrops + 5))
+      drops = initDrops(randomInt(numOfDrops, numOfDrops + 5), screenDrawer.screenWidth)
     }
   }
 })
